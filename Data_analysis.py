@@ -1,7 +1,7 @@
 import pandas as pd
 import sklearn
-from sklearn.preprocessing import MinMaxScaler, Imputer
-# from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.impute import SimpleImputer
 import numpy as np
 from sklearn.feature_extraction import FeatureHasher
 
@@ -28,7 +28,7 @@ class DataAnalysis:
         df = df.rename(columns={'session_durantion': 'session_duration'})
         df = df.replace('\\N', np.nan)
         # Filling in the missing values in session_duration
-        imputer = Imputer(missing_values=np.nan, strategy='mean')
+        imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
         imputer = imputer.fit(df[['session_duration']])
         df['session_duration'] = imputer.transform(df[['session_duration']])
         # changing to a numeric type after filling in the missing values
