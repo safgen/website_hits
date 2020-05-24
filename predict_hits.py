@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import SGDRegressor
+from sklearn.linear_model import SGDRegressor, LogisticRegression
 from sklearn.metrics import mean_squared_error
 from xgboost import XGBRegressor, DMatrix, cv, plot_importance
 
 
 def train_function(model, X, y, X_t, y_t, max_iter=100, verbose=False):
     if model == 'MLP':
-        Model = MLPRegressor(hidden_layer_sizes= (100,100,), max_iter=100, verbose=verbose, tol=1e-4, batch_size=200,
+        Model = MLPRegressor(hidden_layer_sizes= (100,100,), max_iter=max_iter, verbose=verbose, tol=1e-4, batch_size=200,
                              early_stopping=True, validation_fraction=0.1)
 
     elif model == 'XGB':
@@ -33,7 +33,7 @@ def train_function(model, X, y, X_t, y_t, max_iter=100, verbose=False):
 
 if __name__ == "__main__":
     nRowsRead = None
-    full_data = pd.read_csv('feature_engineered_data_2.csv', nrows=nRowsRead).drop(columns=['Unnamed: 0'])
+    full_data = pd.read_csv('feature_engineered_data.csv', nrows=nRowsRead).drop(columns=['Unnamed: 0'])
     data = full_data[full_data["hits"].notna()]
     data_unknown = full_data[full_data["hits"].isna()]
 
@@ -42,24 +42,24 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(data.drop(columns=cols2drop), data['hits'].values,
                                                         test_size=0.25, random_state=52)
     # Training different models with configurations tuned and tested in jupyter notebook
-    # trained_sgd, mse_sgd = train_function(model='SGD', X=X_train, y=y_train, X_t=X_test, y_t=y_test)
+    trained_sgd, mse_sgd = train_function(model='SGD', X=X_train, y=y_train, X_t=X_test, y_t=y_test)
     # for faster execution skip this MLPRegressor Model
-    # trained_mlp, mse_mlp = train_function(model='MLP', X=X_train, y=y_train, X_t=X_test, y_t=y_test)
+    trained_mlp, mse_mlp = train_function(model='MLP', X=X_train, y=y_train, X_t=X_test, y_t=y_test)
     trained_xgb, mse_xgb = train_function(model='XGB', X=X_train, y=y_train, X_t=X_test, y_t=y_test)
-    #
-    # # selecting the best model
-    # if mse_xgb <= mse_mlp and mse_xgb <= mse_sgd:
-    #     model = trained_xgb
-    #     rmse = np.sqrt(mse_xgb)
-    # elif mse_mlp <= mse_xgb and mse_mlp <= mse_sgd:
-    #     model = trained_mlp
-    #     rmse = np.sqrt(mse_mlp)
-    # else:
-    #     model = trained_sgd
-    #     rmse = np.sqrt(mse_sgd)
+    
+    # selecting the best model
+    if mse_xgb <= mse_mlp and mse_xgb <= mse_sgd:
+        model = trained_xgb
+        rmse = np.sqrt(mse_xgb)
+    elif mse_mlp <= mse_xgb and mse_mlp <= mse_sgd:
+        model = trained_mlp
+        rmse = np.sqrt(mse_mlp)
+    else:
+        model = trained_sgd
+        rmse = np.sqrt(mse_sgd)
 
-    model = trained_xgb
-    rmse = np.sqrt(mse_xgb)
+    # model = trained_xgb
+    # rmse = np.sqrt(mse_xgb)
 
     print('RMSE value for the best model is:' + str(rmse))
 

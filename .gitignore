@@ -3,3 +3,4 @@
 .idea/
 *.csv
 /.ipynb_checkpoints/
+.vscode/
